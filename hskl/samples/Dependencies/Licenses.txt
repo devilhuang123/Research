@@ -1,0 +1,4 @@
+To the best of our knowledge, Intel has the right to distribute these libraries under their respective licenses, for the specific purpose of demonstrating how to construct rich 3D applications making use of robust articulated hand tracking. 
+
+These libraries are NOT used by the Intel Articulated Hand Tracking Library, and are only used subject to a more restrictive license, all sample code is released under the BSD license.
+

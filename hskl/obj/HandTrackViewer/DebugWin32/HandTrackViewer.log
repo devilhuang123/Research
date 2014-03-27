@@ -1,0 +1,22 @@
+﻿已經開始建置於 11/13/2013 1:59:13 PM。
+     1>節點 2 (build 目標) 上的專案 "C:\Users\Jack\Desktop\hskl\samples\HandTrackViewer\HandTrackViewer.vcxproj"。
+     1>InitializeBuildStatus:
+         由於指定了 "AlwaysCreate"，因此正在建立 "..\..\obj\HandTrackViewer\DebugWin32\HandTrackViewer.unsuccessfulbuild"。
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\include\ /ZI /nologo /W3 /WX- /Od /Oy- /D _CRT_SECURE_NO_WARNINGS /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"..\..\obj\HandTrackViewer\DebugWin32\\" /Fd"..\..\obj\HandTrackViewer\DebugWin32\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt HandTrackViewer.cpp
+         HandTrackViewer.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\..\bin\Win32\HandTrackViewerDebug.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:..\..\lib\ hskl.lib freeglut.lib opengl32.lib glu32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"..\..\obj\HandTrackViewer\DebugWin32\HandTrackViewerDebug.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Jack\Desktop\hskl\bin\Win32\HandTrackViewerDebug.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"..\..\bin\Win32\HandTrackViewerDebug.lib" /MACHINE:X86 ..\..\obj\HandTrackViewer\DebugWin32\HandTrackViewer.obj
+     1>HandTrackViewer.obj : warning LNK4075: 忽略 '/EDITANDCONTINUE'，由於 '/INCREMENTAL:NO' 規格
+     1>LINK : warning LNK4098: 預設的程式庫 'LIBCMTD' 與其他使用的程式庫衝突，請使用 /NODEFAULTLIB:library
+         HandTrackViewer.vcxproj -> C:\Users\Jack\Desktop\hskl\samples\HandTrackViewer\..\..\bin\Win32\HandTrackViewerDebug.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"..\..\bin\Win32\HandTrackViewerDebug.exe;#1" /manifest ..\..\obj\HandTrackViewer\DebugWin32\HandTrackViewerDebug.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         正在刪除檔案 "..\..\obj\HandTrackViewer\DebugWin32\HandTrackViewer.unsuccessfulbuild"。
+         正在變更時間戳記 "..\..\obj\HandTrackViewer\DebugWin32\HandTrackViewer.lastbuildstate"。
+     1>專案 "C:\Users\Jack\Desktop\hskl\samples\HandTrackViewer\HandTrackViewer.vcxproj" (build 目標) 建置完成。
+
+建置成功。
+
+經過時間 00:00:01.20

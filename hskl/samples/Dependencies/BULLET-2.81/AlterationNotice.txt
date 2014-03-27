@@ -1,0 +1,5 @@
+NOTICE: This source distribution of Bullet has been altered.
+
+Visual Studio 2010 release binaries of the core library files have been generated, while all *.cpp files, build files, and demo source and asset files have been removed.
+
+This notice is intended to satisfy condition #2 of the ZLib-style license under which Bullet has been released.
