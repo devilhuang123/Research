@@ -30,11 +30,11 @@ void initializeData();
 void checkLocation();
 void checkPosition();
 void checkFinger(int region);
-void midiTable(int num,int region);
+void midiTable(int num,int region,bool temp);
 void getData(void* p);
 void mideOutPut(int btnNum,int level);
 int	fingerNum,btnNum;
-bool musicControl[3][7];
+bool musicControl[8][4];
 // monitor the status of returning functions
 int flag;     
 int bytesRecv = SOCKET_ERROR;
@@ -183,14 +183,26 @@ void getData(void* p)
 	{
 		bytesRecv = recv( m_socket, recvbuf, 1, 0 );
 		if(recvbuf[0]==1)	
+		{
 			printf("open\n");
+			MusicTemp=true;
+		}
 		else
+		{
 			printf("close\n");
+			for(int i=0;i<8;i++)
+				for(int j=0;j<4;j++)
+					if(musicControl[i][j]==false)
+						midiTable(i,j,false);
+	
+			MusicTemp=false;
+		}
 	}
 	
 }
-void mideOutPut(int btnNum,int level)
+void mideOutPut(int btnNum,int level,bool b)
 {
+	
 	int musicNum=0;
 	switch(btnNum)
 	{
@@ -216,58 +228,28 @@ void mideOutPut(int btnNum,int level)
 			musicNum=71;
 			break;
 	}
-		if(level ==2)
-			musicNum+=12;
-		else if(level ==0)
-			musicNum-=12;
+	if(level ==2)
+		musicNum+=12;
+	else if(level ==0)
+		musicNum-=12;
 		
+	if(b)
+	{
 		message.push_back (144);
 		message.push_back (musicNum);
 		message.push_back (90);
-		midiout->sendMessage( &message );
-		message.clear();
-}
-/*
-void checkPosition()
-{
-	double posi_y[]={-0.1,-0.07,-0.04,-0.01,0.02,0.05,0.08,0.11,0.14,0.17,0.2,0.23};
-	int finger_pos[]={4,7,10,13,16};
-	for(int j=0;j<5;j++)
-	{
-		if(g_tracking.GetPosition(finger_pos[j]).z>0.38 && g_tracking.GetPosition(finger_pos[j]).z<0.42 )
-		if(g_tracking.GetPosition(finger_pos[j]).x>-0.0125 && g_tracking.GetPosition(finger_pos[j]).x< 0.0125)
-		{
-			for(int i=0;i<11;i++)
-			{
-				if(g_tracking.GetPosition(finger_pos[j]).y>(posi_y[i]-0.0125)&& g_tracking.GetPosition(finger_pos[j]).y< posi_y[i+1]-0.0125)
-				{
-					btnNum=i;
-					fingerNum=j;
-					/*if(musicControl[i]&&temp)
-					{
-						mideOutPut(i);
-
-						musicControl[i]=false;
-						temp=false;
-						//printf("close btn%d\n",i);
-					}
-					//mideOutPut(i);
-				}	
-			}
-		}
-		
-		if(g_tracking.GetPosition(finger_pos[fingerNum]).z<0.38 || g_tracking.GetPosition(finger_pos[fingerNum]).z>0.42 &&
-			g_tracking.GetPosition(finger_pos[fingerNum]).x<-0.0125 || g_tracking.GetPosition(finger_pos[fingerNum]).x> 0.0125 && 
-			g_tracking.GetPosition(finger_pos[fingerNum]).y<(posi_y[btnNum]-0.0125)|| g_tracking.GetPosition(finger_pos[fingerNum]).y > posi_y[btnNum+1]-0.0125)
-		{
-			//musicControl[btnNum]=true;
-			//printf("open btn%d\n",btnNum);
-		}
-		
-				
 	}
-					
-}*/
+	else
+	{
+		message.push_back (128);
+		message.push_back (musicNum);
+		message.push_back (90);
+	}
+		
+	midiout->sendMessage( &message );
+	message.clear();
+}
+
 void drawRegion(int num)
 {
 	double tempX=0,tempX1=0;
@@ -301,12 +283,14 @@ void checkLocation()
 		{
 			if(g_tracking.GetPosition(1).y>0)
 			{
-				checkFinger(i+4);
+				if(MusicTemp)
+					checkFinger(i+4);
 				drawRegion(i+4);
 			}
 			else
 			{
-				checkFinger(i);
+				if(MusicTemp)
+					checkFinger(i);
 				drawRegion(i);
 			}
 		}
@@ -316,128 +300,122 @@ void checkLocation()
 }
 void checkFinger(int region)
 {
-	//printf("region=%d \n",region);
+	
 	int fingerNum[]={4,7,10,13};
 	double temp=0,max=0;
 	int num=-1;
+	//算手指均值
 	for(int i=0;i<4;i++)
-	{
 		temp+=g_tracking.GetPosition(fingerNum[i]).z;
-	}
 	temp/=4;
-	//max=g_tracking.GetPosition(fingerNum[0]).z-temp;
+	//找出手指距離差的最大值
 	for(int i=0;i<4;i++)
-	{
-		if(g_tracking.GetPosition(fingerNum[i]).z-temp>max)
-		{
-			max=g_tracking.GetPosition(fingerNum[i]).z-temp;
-			num=i;
-		}
-		//printf("num=%d loca=%f de=%f\n",i,g_tracking.GetPosition(fingerNum[i]).z,g_tracking.GetPosition(fingerNum[i]).z-temp);
-	}
+		if(g_tracking.GetPosition(fingerNum[i]).z-temp>max){max=g_tracking.GetPosition(fingerNum[i]).z-temp;num=i;}
+
+
+	printf("region=%d num=%d \n",region,num);
+	//大於0.02就表示有一指按下
 	if(max>0.02)
 	{
-		//printf("num=%d region=%d \n",num,region);
-		//if(musicControl[region][num])
-		
-			printf("num=%d region=%d \n",num,region);
-			if(musicControl[region][num])
-			{
-				midiTable(num,region);
-			}
-			NowNum=num;
-			NowRegion=region;
-			
+		if(musicControl[region][num])
+		{
 			musicControl[region][num]=false;
-		
-			//printf("%d num=%d region=%d at the same way\n",musicControl[region][num],num,region);
-		
+			midiTable(num,region,true);
+				
+		}
+		NowNum=num;
+		NowRegion=region;	
+			
 	}
 	else
 	{
-		//printf("region=%d nowNum=%dnot in range\n",NowRegion,NowNum);
+		midiTable(NowNum,NowRegion,false);
+		for(int i=0;i<8;i++)
+			for(int j=0;j<4;j++)
+				if(musicControl[i][j]==false)
+				{
+					midiTable(i,j,false);
+				}
 		musicControl[NowRegion][NowNum]=true;
 	}
-		
 
-	//if(NowRegion!=region || NowNum!=num)
-		//musicControl[NowRegion][NowNum]=true;
 }
 
-void midiTable(int num,int region)
+void midiTable(int num,int region,bool temp)
 {
+	
 	switch(region)
 	{
 		case 0:
 			switch(num)
 			{
-				case 0:mideOutPut(2,1);break;
-				case 1:mideOutPut(1,1);break;
-				case 2:mideOutPut(7,0);break;
-				case 3:mideOutPut(6,0);break;
+				case 0:mideOutPut(2,1,temp);break;
+				case 1:mideOutPut(1,1,temp);break;
+				case 2:mideOutPut(7,0,temp);break;
+				case 3:mideOutPut(6,0,temp);break;
 			}
 			break;
 		case 1:
 			switch(num)
 			{
-				case 0:mideOutPut(6,1);break;
-				case 1:mideOutPut(5,1);break;
-				case 2:mideOutPut(4,1);break;
-				case 3:mideOutPut(3,1);break;
+				case 0:mideOutPut(6,1,temp);break;
+				case 1:mideOutPut(5,1,temp);break;
+				case 2:mideOutPut(4,1,temp);break;
+				case 3:mideOutPut(3,1,temp);break;
 			}
 			break;
 		case 2:
 			switch(num)
 			{
-				case 0:mideOutPut(3,2);break;
-				case 1:mideOutPut(2,2);break;
-				case 2:mideOutPut(1,2);break;
-				case 3:mideOutPut(7,1);break;
+				case 0:mideOutPut(3,2,temp);break;
+				case 1:mideOutPut(2,2,temp);break;
+				case 2:mideOutPut(1,2,temp);break;
+				case 3:mideOutPut(7,1,temp);break;
 			}
 			break;
 		case 3:
 			switch(num)
 			{
-				case 0:mideOutPut(7,2);break;
-				case 1:mideOutPut(6,2);break;
-				case 2:mideOutPut(5,2);break;
-				case 3:mideOutPut(4,2);break;
+				case 0:mideOutPut(7,2,temp);break;
+				case 1:mideOutPut(6,2,temp);break;
+				case 2:mideOutPut(5,2,temp);break;
+				case 3:mideOutPut(4,2,temp);break;
 			}
 			break;
 		case 4:
 			switch(num)
 			{
-				case 0:mideOutPut(4,1);break;
-				case 1:mideOutPut(3,1);break;
-				case 2:mideOutPut(2,1);break;
-				case 3:mideOutPut(1,1);break;
+				case 0:mideOutPut(4,1,temp);break;
+				case 1:mideOutPut(3,1,temp);break;
+				case 2:mideOutPut(2,1,temp);break;
+				case 3:mideOutPut(1,1,temp);break;
 			}
 			break;
 		case 5:
 			switch(num)
 			{
-				case 0:mideOutPut(1,2);break;
-				case 1:mideOutPut(7,1);break;
-				case 2:mideOutPut(6,1);break;
-				case 3:mideOutPut(5,1);break;
+				case 0:mideOutPut(1,2,temp);break;
+				case 1:mideOutPut(7,1,temp);break;
+				case 2:mideOutPut(6,1,temp);break;
+				case 3:mideOutPut(5,1,temp);break;
 			}
 			break;
 		case 6:
 			switch(num)
 			{
-				case 0:mideOutPut(5,2);break;
-				case 1:mideOutPut(4,2);break;
-				case 2:mideOutPut(3,2);break;
-				case 3:mideOutPut(2,2);break;
+				case 0:mideOutPut(5,2,temp);break;
+				case 1:mideOutPut(4,2,temp);break;
+				case 2:mideOutPut(3,2,temp);break;
+				case 3:mideOutPut(2,2,temp);break;
 			}
 			break;
 		case 7:
 			switch(num)
 			{
-				case 0:mideOutPut(2,2);break;
-				case 1:mideOutPut(1,2);break;
-				case 2:mideOutPut(7,2);break;
-				case 3:mideOutPut(6,2);break;
+				case 0:mideOutPut(2,2,temp);break;
+				case 1:mideOutPut(1,2,temp);break;
+				case 2:mideOutPut(7,2,temp);break;
+				case 3:mideOutPut(6,2,temp);break;
 			}
 			break;
 	
@@ -599,10 +577,10 @@ int main(int argc, char * argv[])
             error.printMessage();
         }
     }
-     midiout->openPort(0);
-	for(i=0;i<3;i++)
+     midiout->openPort(1);
+	for(i=0;i<8;i++)
 	{
-		for(int j=0;j<7;j++)
+		for(int j=0;j<4;j++)
 			musicControl[i][j]=true;
 	}
 	if(!g_tracking.Init()) { fprintf(stderr, "Unable to initialize tracking\n"); return -1; }
