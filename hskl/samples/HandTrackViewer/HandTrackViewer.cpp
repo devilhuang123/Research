@@ -43,7 +43,7 @@ char recvbuf[32] = "";
 SOCKET m_socket;
 //music Temp
 bool MusicTemp;
-int NowRegion,NowNum;
+int NowRegion=-1,NowNum=-1;
 char *Data1 = new char[99];
 
 void UpdateTracking()
@@ -81,10 +81,12 @@ void OnKeyboard(unsigned char ch, int x, int y)
 void DrawString(int x, int y, const char * format, ...)
 {
 	glRasterPos2i(x,y);
-	va_list args; char buffer[1024];
+	va_list args; 
+	char buffer[1024];
 	va_start(args, format);
 	int n = vsnprintf(buffer, sizeof(buffer), format, args);
-	for(int i=0; i<n; ++i) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, buffer[i]);
+	for(int i=0; i<n; ++i) 
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, buffer[i]);
 	va_end(args);
 }
 void drawLine()
@@ -184,17 +186,16 @@ void getData(void* p)
 		bytesRecv = recv( m_socket, recvbuf, 1, 0 );
 		if(recvbuf[0]==1)	
 		{
-			printf("open\n");
 			MusicTemp=true;
 		}
 		else
 		{
-			printf("close\n");
+			/*
 			for(int i=0;i<8;i++)
 				for(int j=0;j<4;j++)
-					if(musicControl[i][j]==false)
-						midiTable(i,j,false);
-	
+					if(musicControl[j][i]==false)
+						midiTable(j,i,false);
+			*/
 			MusicTemp=false;
 		}
 	}
@@ -202,7 +203,7 @@ void getData(void* p)
 }
 void mideOutPut(int btnNum,int level,bool b)
 {
-	
+	printf("bool=%d\n",b);
 	int musicNum=0;
 	switch(btnNum)
 	{
@@ -237,7 +238,10 @@ void mideOutPut(int btnNum,int level,bool b)
 	{
 		message.push_back (144);
 		message.push_back (musicNum);
-		message.push_back (90);
+		if(MusicTemp)
+			message.push_back (90);
+		else
+			message.push_back (0);
 	}
 	else
 	{
@@ -283,16 +287,21 @@ void checkLocation()
 		{
 			if(g_tracking.GetPosition(1).y>0)
 			{
-				if(MusicTemp)
-					checkFinger(i+4);
+				NowRegion=i+4;
+				checkFinger(i+4);
 				drawRegion(i+4);
 			}
 			else
 			{
-				if(MusicTemp)
-					checkFinger(i);
+				NowRegion=i;
+				checkFinger(i);
 				drawRegion(i);
 			}
+		}
+
+		if(g_tracking.GetPosition(1).x < 0 || g_tracking.GetPosition(1).x > 0.2)
+		{
+			NowRegion=-1;
 		}
 	}
 	
@@ -313,30 +322,38 @@ void checkFinger(int region)
 		if(g_tracking.GetPosition(fingerNum[i]).z-temp>max){max=g_tracking.GetPosition(fingerNum[i]).z-temp;num=i;}
 
 
-	printf("region=%d num=%d \n",region,num);
-	//大於0.02就表示有一指按下
-	if(max>0.02)
+	
+	//大於0.018就表示有一指按下
+	if(max>0.015)
 	{
+		
 		if(musicControl[region][num])
 		{
 			musicControl[region][num]=false;
+
 			midiTable(num,region,true);
 				
 		}
 		NowNum=num;
 		NowRegion=region;	
-			
+
 	}
 	else
 	{
-		midiTable(NowNum,NowRegion,false);
+		NowNum=-1;
+
+		//midiTable(NowNum,NowRegion,false);
+
+		///initialize midi
+		
 		for(int i=0;i<8;i++)
 			for(int j=0;j<4;j++)
 				if(musicControl[i][j]==false)
 				{
-					midiTable(i,j,false);
+					midiTable(j,i,false); 
+					musicControl[i][j]=true;
 				}
-		musicControl[NowRegion][NowNum]=true;
+		
 	}
 
 }
@@ -545,8 +562,9 @@ void OnDisplay()
 	glPushMatrix(); 
 	glOrtho(0,g_winWidth,g_winHeight,0,-1,1);
 	DrawString(10,24, "Tracking %s at %d FPS with error of %0.4f (Press r/l/t to change) [%d bit]", g_profileString, g_fps, g_tracking.GetTrackingError(0), sizeof(void *)*8);
-	DrawString(10,40, "Assuming hand width of %0.2f cm and hand length of %0.2f cm (Press w/a/s/d to adjust)", g_handWidth*100, g_handLength*100);
-	DrawString(10,56, "Displayed layers: 1-mesh %s, 2-skeleton %s, 3-bases %s, 4-segmentation %s (Press keys 1/2/3/4 to toggle)", g_layers[0]?"on":"off", g_layers[1]?"on":"off", g_layers[2]?"on":"off", g_layers[3]?"on":"off");
+	DrawString(10,40, "Your hand is in Region %d and the finger is number %d", NowRegion, NowNum);
+	//DrawString(10,40, "Assuming hand width of %0.2f cm and hand length of %0.2f cm (Press w/a/s/d to adjust)", g_handWidth*100, g_handLength*100);
+	//DrawString(10,56, "Displayed layers: 1-mesh %s, 2-skeleton %s, 3-bases %s, 4-segmentation %s (Press keys 1/2/3/4 to toggle)", g_layers[0]?"on":"off", g_layers[1]?"on":"off", g_layers[2]?"on":"off", g_layers[3]?"on":"off");
 	glPopMatrix();
 	
 	//drawLine();

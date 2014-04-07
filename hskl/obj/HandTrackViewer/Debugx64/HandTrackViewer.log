@@ -1,4 +1,4 @@
-﻿已經開始建置於 3/28/2014 1:35:18 AM。
+﻿已經開始建置於 4/2/2014 9:40:08 PM。
      1>節點 2 (build 目標) 上的專案 "C:\Users\Jack\Desktop\Research\hskl\samples\HandTrackViewer\HandTrackViewer.vcxproj"。
      1>InitializeBuildStatus:
          由於指定了 "AlwaysCreate"，因此正在建立 "..\..\obj\HandTrackViewer\Debugx64\HandTrackViewer.unsuccessfulbuild"。
@@ -14,4 +14,4 @@
 
 建置成功。
 
-經過時間 00:00:00.07
+經過時間 00:00:00.12
